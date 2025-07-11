@@ -1,0 +1,9 @@
+<h1>Create a message in room {{ room.name }}</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Send</button>
+</form>
+
+<a href="{% url 'room_detail' id=room.id %}">Back to room</a>

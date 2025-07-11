@@ -1,0 +1,46 @@
+{% extends 'chat/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="welcome-container">
+        <h2>Welcome to our chat platform!</h2>
+        <p class="funny-text">Still talking to your screen alone? Join us, it will be less weird! 😄.</p>
+        
+        <div class="funny-image">
+            <img src="{% static 'css/funny-image.webp' %}" alt="Funny chat" class="funny-image">
+        </div>
+        <div class="auth-container">
+            <h3>Login</h3>
+            <form class="form-login" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Login</button>
+            </form>
+            
+            <div class="signup-link">
+                <p>Don't have an account yet? <a href="{% url 'register' %}">Register here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .welcome-container {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .auth-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .signup-link {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+{% endblock %}

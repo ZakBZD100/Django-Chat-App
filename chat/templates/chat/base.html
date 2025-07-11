@@ -1,0 +1,46 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/chat-icon">
+    <!--link to Emoji Picker JavaScript -->
+    <script src="https://cdn.jsdelivr.net/emojione/2.2.7/lib/js/emojione.min.js"></script>
+    
+    <title>{% block title %}Web Project{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1>Welcome to the site</h1>
+            <div class="user-profile">
+                {% if user.is_authenticated %}
+                    <span>Connected as: <strong>{{ user.username }}</strong></span>
+                    <a href="{% url 'logout' %}" class="auth-link logout">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="auth-link login">Login</a>
+                    <a href="{% url 'register' %}" class="auth-link signup">Register</a>
+                {% endif %}
+            </div>
+        </div>
+        <nav>
+            <ul>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'room_list' %}">Rooms</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Web Project (Group: El-Bouzidi/Bozkurt/Filali) </p>
+    </footer>
+</body>
+</html>

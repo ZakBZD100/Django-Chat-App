@@ -1,0 +1,181 @@
+{% extends 'chat/base.html' %}
+{% block title %}Room: {{ room.name }}{% endblock %}
+{% block content %}
+<section class="room-detail">
+    <div class="room-header">
+        <h2><span class="RoomName">Room name:</span> <br>{{ room.name }}</br></h2>
+        <h2><span class="RoomDesc">Description:</span> <br>{{ room.description }}</br></h2>
+        <p><a href="{% url 'room_list' %}">← Back to room list</a></p>
+        {% if user.is_staff %}
+            <a href="{% url 'create_room' %}">Create a new room</a>
+        {% endif %}
+    </div>
+
+    <div class="message-container">
+        <h3>Messages</h3>
+        <ul id="message-list" class="message-list">
+            {% for message in messages %}
+                <li class="message-item">
+                    <strong>{{ message.user.username|default:"Unknown user" }}</strong> :
+                    <p>{{ message.text|default:"No message available" }}</p>
+                    <span>{{ message.date|date:"Y-m-d H:i:s" }}</span>
+                </li>
+            {% empty %}
+                <p class="empty-message"></p>
+            {% endfor %}
+        </ul>
+    </div>
+
+    {% if user.is_authenticated %}
+        <div class="message-form">
+            <h3>Send a message</h3>
+            <form id="message-form" method="post">
+                {% csrf_token %}
+                <textarea id="message-textarea" name="text" placeholder="Write a message..." required></textarea>
+                
+                <button id="emoji-button" type="button">😊</button>
+                
+                <div id="emoji-picker" class="emoji-picker" style="display:none;"></div>
+                
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    {% else %}
+        <p>Please <a href="{% url 'login' %}">login</a> to send a message.</p>
+    {% endif %}
+</section>
+
+{{ room.id|json_script:"room-id" }}
+{{ request.user.username|json_script:"username" }}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/emojione/2.2.7/lib/js/emojione.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const roomId = JSON.parse(document.getElementById('room-id').textContent);
+        let lastMessageId = 0;
+        
+        //load new messages
+        function loadNewMessages() {
+            fetch(`/room/${roomId}/messages/?last_id=${lastMessageId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.messages.forEach(message => {
+                        if (message.id > lastMessageId) {
+                            lastMessageId = message.id;
+                            appendMessage(message);
+                        }
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    
+        //add a message to the display
+        function appendMessage(message) {
+            const messageList = document.querySelector('#message-list');
+            const messageItem = document.createElement('li');
+            
+            const username = message.username || '';
+            const text = message.text || '';
+        
+            if (username && text) {
+                messageItem.innerHTML = `
+                    <strong>${username}</strong> :
+                    <p>${text}</p>
+                    <span>${message.date}</span>
+                `;
+                messageList.appendChild(messageItem);
+            }
+            
+            messageList.scrollTop = messageList.scrollHeight;
+        }
+        
+        //send a message
+        const messageForm = document.getElementById('message-form');
+        const messageTextarea = document.getElementById('message-textarea');
+        
+        messageForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            let message = messageTextarea.value.trim();
+            
+            if (!message) {
+                console.error('Message is empty.');
+                return;
+            }
+            
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch(`/room/${roomId}/send_message/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ text: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    appendMessage(data.message);
+                    messageTextarea.value = '';
+                } else {
+                    console.error(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+        
+        //emoji management
+        const emojiButton = document.getElementById('emoji-button');
+        const emojiPicker = document.getElementById('emoji-picker');
+
+        const emojis = [
+            '😀', '😁', '😂', '🤣', '😊', '😇', '🙂', '😍', '🥰', '😘', '😎', '😌', '🤩',
+            '😢', '😭', '😞', '😔', '😟', '😠', '😡', '🤬', '😱', '😨', '😰', '😳', '😓', '🤔',
+            '👍', '👎', '✌️', '👌', '👏', '🙌', '🤝', '🙏', '💪', '👋', '🤘', '✊',
+            '🎉', '🎊', '🥳', '💃', '🕺', '🎁', '✨', '🌟', '🎶',
+            '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '💕', '💞', '💓', '💗', '💖',
+            '😐', '😑', '🙄', '😴', '🤯', '😬', '🤥', '🤨', '🤢', '🤮', '😵', '🥴',
+            '🔥', '🌈', '☀️', '🌧️', '💦', '🌊', '🍎', '🍕', '🎂', '🍩'
+        ];
+    
+        emojis.forEach(emoji => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.innerHTML = emoji;
+            button.classList.add('emoji-btn');
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                messageTextarea.value += emoji;
+                emojiPicker.style.display = 'none';
+            });
+            emojiPicker.appendChild(button);
+        });
+
+        emojiButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            emojiPicker.style.display = emojiPicker.style.display === 'none' ? 'block' : 'none';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target !== emojiButton && !emojiPicker.contains(e.target)) {
+                emojiPicker.style.display = 'none';
+            }
+        });
+
+        //handle message sending with Enter key
+        messageTextarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                messageForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        setInterval(loadNewMessages, 2000);
+        
+        loadNewMessages();
+    });
+</script>
+{% endblock %}
+{% endblock %}

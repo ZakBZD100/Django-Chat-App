@@ -1,0 +1,30 @@
+{% extends 'chat/base.html' %}
+
+{% block content %}
+    <h2>Room list:</h2>
+    <ul>
+        {% for room in page_obj %}
+            <li><a href="{% url 'room_detail' id=room.id %}">{{ room.name }}</a></li>
+        {% endfor %}
+    </ul>
+    <div class="room-header">
+        {% if user.is_staff %}
+            <a href="{% url 'create_room' %}">Create a new room</a>
+        {% endif %}
+    </div>
+    <div>
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_previous %}
+            <a href="?page=1"><<--</a>
+            &nbsp;
+            <a href="?page={{ page_obj.previous_page_number }}"><-</a>
+        {% endif %}
+            &nbsp;
+            &nbsp;
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}"> -> </a>
+            &nbsp;
+            <a href="?page={{ page_obj.paginator.num_pages }}">-->></a>
+        {% endif %}
+    </div>
+{% endblock %}
