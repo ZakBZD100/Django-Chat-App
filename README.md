@@ -3,6 +3,8 @@
 
 A Django-based chat application that allows users to create discussion rooms and exchange messages with automatic updates.
 
+⚠️ The projet is made in French, as required by the French academic system.
+
 ## Features
 
 - Authentication system (registration/login)
@@ -57,19 +59,19 @@ python manage.py runserver
 
 ```
 prog_web/
-├── chat/                   # Main application
-│   ├── static/            # Static files (CSS, JS)
-│   │   └── css/          # CSS styles
-│   ├── templates/         # HTML templates
-│   ├── migrations/        # Database migrations
-│   ├── models.py          # Data models
-│   ├── views.py           # Views
-│   ├── urls.py           # URL configuration
-│   └── forms.py          # Forms
-└── prog_web/             # Project configuration
-    ├── settings.py       # Project settings
-    ├── urls.py          # Main URLs
-    └── wsgi.py          # WSGI configuration
+├── chat/                   #main application
+│   ├── static/            #static files (CSS, JS)
+│   │   └── css/          #CSS styles
+│   ├── templates/         #HTML templates
+│   ├── migrations/        #Database migrations
+│   ├── models.py          #Data models
+│   ├── views.py           #views
+│   ├── urls.py           #URL configuration
+│   └── forms.py          #Forms
+└── prog_web/             #project configuration
+    ├── settings.py       #project settings
+    ├── urls.py          #main URLs
+    └── wsgi.py          #WSGI configuration
 ```
 
 ## Screenshots
