@@ -123,3 +123,6 @@ prog_web/
 - **Security**: CSRF protection, authentication, validation
 - **Deployment**: PythonAnywhere, WSGI
 
+## License
+- **This project is released under the MIT License.
+
